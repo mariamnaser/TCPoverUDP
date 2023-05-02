@@ -46,7 +46,7 @@ def send_nak(seq_num, sock, addr):
     sock.sendto(str(seq_num).encode(), addr)
     logging.debug("Sent NAK for packet with sequence number: %s", seq_num)
 
-def selective_repeat_receiver(outputfile, listening_port, window_size, port_for_acks):
+def selective_repeat_receiver(outputfile, listening_port, address_for_acks, window_size, port_for_acks):
     """
     Receive packets using the selective repeat protocol with checksum and hash verification.
     """
@@ -150,11 +150,11 @@ def main():
 
     outputfile = sys.argv[1]
     listening_port = int(sys.argv[2])
-    window_size = sys.argv[3]
+    address_for_acks = sys.argv[3]
     port_for_acks = int(sys.argv[4])
 
     # Call the selective_repeat_receiver function with the provided arguments
-    selective_repeat_receiver(outputfile, listening_port, window_size, port_for_acks)
+    selective_repeat_receiver(outputfile, listening_port, address_for_acks, window_size, port_for_acks)
 
 if __name__ == "__main__":
     main()
