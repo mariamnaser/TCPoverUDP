@@ -1,7 +1,7 @@
 import socket
 import hashlib
 import logging
-
+import sys
 #get machine IP
 hostname = socket.gethostname()
 ip_address = socket.gethostbyname(hostname)
@@ -46,7 +46,7 @@ def send_nak(seq_num, sock, addr):
     sock.sendto(str(seq_num).encode(), addr)
     logging.debug("Sent NAK for packet with sequence number: %s", seq_num)
 
-def selective_repeat_receiver(outputfile, listening_port, address_for_acks, port_for_acks):
+def selective_repeat_receiver(outputfile, listening_port, window_size, port_for_acks):
     """
     Receive packets using the selective repeat protocol with checksum and hash verification.
     """
@@ -55,7 +55,7 @@ def selective_repeat_receiver(outputfile, listening_port, address_for_acks, port
         sock.bind(('0.0.0.0', listening_port))
 
         # Set up the sliding window parameters
-        WINDOW_SIZE = 10
+        WINDOW_SIZE = window_size
         buffer = []
 
         # Wait for a SYN message from the sender to initiate the handshake
@@ -140,3 +140,21 @@ def selective_repeat_receiver(outputfile, listening_port, address_for_acks, port
                                     logging.debug("An error occurred while starting the timer")
     except Exception as e:
         logging.error("An error occurred: %s", e)
+
+
+def main():
+    # Check if command-line arguments are correct
+    if len(sys.argv) != 5:
+        print(f"Usage: {sys.argv[0]} <outputfile> <listening_port> <address_for_acks> <port_for_acks>")
+        return
+
+    outputfile = sys.argv[1]
+    listening_port = int(sys.argv[2])
+    window_size = sys.argv[3]
+    port_for_acks = int(sys.argv[4])
+
+    # Call the selective_repeat_receiver function with the provided arguments
+    selective_repeat_receiver(outputfile, listening_port, window_size, port_for_acks)
+
+if __name__ == "__main__":
+    main()

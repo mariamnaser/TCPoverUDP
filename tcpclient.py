@@ -3,6 +3,7 @@ import hashlib
 import zlib
 import time
 import logging
+import sys
 
 logging.basicConfig(level=logging.DEBUG)
 #get machine IP
@@ -31,9 +32,10 @@ def send_ack(sock, addr):
     sock.sendto(b"ACK", addr)
 
 # Function to send a packet to the server
-def send_packet(sock, seq_num, packet, remote_addr, remote_port, local_port, window_size):
+def send_packet(sock, seq_num, packet, remote_addr, remote_port, window_size):
     # Set the TCP header fields
-    source_port = local_port # Use the local port passed as argument
+    _, port = sock.getsockname()
+    source_port = port # Use the local port passed as argument
     dest_port = remote_port # Use the remote port passed as argument
     seq_num = seq_num.to_bytes(4, byteorder='big')
     ack_num = b'\x00\x00\x00\x00' # Set to zero
@@ -64,10 +66,10 @@ def send_fin(sock, remote_addr, remote_port):
     sock.sendto(b"FIN", (remote_addr, remote_port))
 #another thing
 
-def send_file_over_udp(file_path, server_ip, server_port, local_port, window_size, ack_port):
+def selective_repeat_sender(file_path, server_ip, server_port, window_size, ack_port):
     # Create a UDP socket and bind it to the local port
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind(('0.0.0.0', local_port))
+    sock.bind(('0.0.0.0', 0))
 
     # Set up the sliding window parameters
     TIMEOUT = 0.5 # Initial timeout in seconds
@@ -140,17 +142,17 @@ def send_file_over_udp(file_path, server_ip, server_port, local_port, window_siz
 def main():
     # Check if command-line arguments are correct
     if len(sys.argv) != 6:
-        print(f"Usage: {sys.argv[0]} <inputfile> <remote_address> <remote_port> <window_size> <timeout>")
+        print(f"Usage: {sys.argv[0]} <inputfile> <remote_address> <remote_port> <window_size> <ack_port>")
         return
 
     inputfile = sys.argv[1]
     remote_address = sys.argv[2]
     remote_port = int(sys.argv[3])
     window_size = int(sys.argv[4])
-    timeout = float(sys.argv[5])
+    ack_port = float(sys.argv[5])
 
     # Call the selective_repeat_sender function with the provided arguments
-    selective_repeat_sender(inputfile, remote_address, remote_port, window_size, timeout)
+    selective_repeat_sender(inputfile, remote_address, remote_port, window_size, ack_port)
 
 if __name__ == "__main__":
     main()
