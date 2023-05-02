@@ -136,3 +136,21 @@ def send_file_over_udp(file_path, server_ip, server_port, local_port, window_siz
             send_fin(sock, remote_addr, remote_port)
             print("Sent FIN request to remote address:", remote_addr, "remote port:", remote_port)
             logging.info("Transmission complete")
+
+def main():
+    # Check if command-line arguments are correct
+    if len(sys.argv) != 6:
+        print(f"Usage: {sys.argv[0]} <inputfile> <remote_address> <remote_port> <window_size> <timeout>")
+        return
+
+    inputfile = sys.argv[1]
+    remote_address = sys.argv[2]
+    remote_port = int(sys.argv[3])
+    window_size = int(sys.argv[4])
+    timeout = float(sys.argv[5])
+
+    # Call the selective_repeat_sender function with the provided arguments
+    selective_repeat_sender(inputfile, remote_address, remote_port, window_size, timeout)
+
+if __name__ == "__main__":
+    main()

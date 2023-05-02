@@ -1,11 +1,11 @@
-import socketimport socket
+import socket
 import hashlib
 import logging
 
 #get machine IP
 hostname = socket.gethostname()
 ip_address = socket.gethostbyname(hostname)
-
+print(ip_address)
 TIMEOUT = 0.5
 logging.basicConfig(level=logging.ERROR)
 
@@ -134,12 +134,9 @@ def selective_repeat_receiver(outputfile, listening_port, address_for_acks, port
                                 send_nak(seq_num, sock, addr)
                             # Restart timer for the first unacknowledged packet
                                 timer = Timer(TIMEOUT_DURATION, handle_timeout, args=[expected_seq_num])
-                                timer.start()
-                        # Clear the buffer since all packets in it should have been retransmitted by now
-                        buffer = []
-
-
-        except socket.timeout:
-            logging.info("Timeout occurred while waiting for packet")
-            # Send a NAK for all expected packets in the window
-            for seq_num in range(expected_seq_num, expected_seq_num + WINDOW_SIZE
+                                try:
+                                    timer.start()
+                                except:
+                                    logging.debug("An error occurred while starting the timer")
+    except Exception as e:
+        logging.error("An error occurred: %s", e)
